@@ -2,6 +2,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
+import dash_table
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
@@ -18,6 +19,11 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 df = pd.read_csv('all_species_frequency_all_years_7f3d.csv')
 df_counties = pd.read_csv('all_species_cfrequency.csv')
 df_fchange = pd.read_csv('frequency_change2.csv')
+df_irr = pd.read_csv('irr.csv')
+df_inc = pd.read_csv('species_increasing.csv')
+df_dec = pd.read_csv('species_decreasing.csv')
+df_common = pd.read_csv('most_common.csv')
+df_rarest = pd.read_csv('rarest_2020.csv')
 
 winter_s = ''
 species_s = ''
@@ -108,7 +114,7 @@ app.layout = html.Div([
         placeholder='select month...',
         multi=False,
         value=7,
-        style={'width': '30%', 'margin':'auto'},
+        style={'width': '40%', 'margin':'auto'},
         optionHeight=20,
         persistence=True,
         persistence_type='session'
@@ -134,6 +140,144 @@ app.layout = html.Div([
 
     dcc.Graph(id='frequency_change', figure={}),
 
+    html.Br(),
+
+    html.H5('Most Irruptive Species', style={'text-align': 'center'}),
+    
+    html.Br(),
+
+    dash_table.DataTable(
+        id='irr_table',
+        style_table={'width':'50%', 'margin':'auto'},
+        columns=[{"name": i, "id": i} for i in df_irr.columns],
+        data=df_irr.to_dict('records'),
+        style_cell=dict(textAlign='left'),
+        style_header=dict(backgroundColor="light grey"),
+        style_data=dict(backgroundColor="lavender"),
+        style_cell_conditional=[
+        {'if': {'column_id': 'RANK'},
+         'width': '30px'},
+        {'if': {'column_id': 'COMMON NAME'},
+         'width': '50px'},
+        {'if': {'column_id': 'MAX MIN RATIO'},
+         'width': '30px'},
+        {'if': {'column_id': 'MAX'},
+         'width': '30px'},
+        {'if': {'column_id': 'MIN'},
+         'width': '30px'},
+        {'if': {'column_id': 'DIFF'},
+         'width': '30px'},
+    ]),
+
+    html.Br(),
+    html.Br(),
+
+    html.H5('Species with Declining Frequencies', style={'text-align': 'center'}),
+    
+    html.P('(species with greatest percent decrease in frequency between 2001–2003 and 2018–2020)', style={'text-align': 'center'}),
+
+    html.Br(),
+
+    dash_table.DataTable(
+        id='dec_table',
+        style_table={'width':'50%', 'margin':'auto'},
+        columns=[{"name": i, "id": i} for i in df_dec.columns],
+        data=df_dec.to_dict('records'),
+        style_cell=dict(textAlign='left'),
+        style_header=dict(backgroundColor="light grey"),
+        style_data=dict(backgroundColor="lavender"),
+        style_cell_conditional=[
+        {'if': {'column_id': 'RANK'},
+         'width': '30px'},
+        {'if': {'column_id': 'COMMON NAME'},
+         'width': '50px'},
+        {'if': {'column_id': 'FREQUENCY PCT DECREASE'},
+         'width': '30px'},
+        {'if': {'column_id': 'MAX'},
+         'width': '30px'},
+        {'if': {'column_id': 'MIN'},
+         'width': '30px'},
+        {'if': {'column_id': 'DIFF'},
+         'width': '30px'},
+    ]),
+
+    html.Br(),
+    html.Br(),
+
+    html.H5('Species with Increasing Frequencies', style={'text-align': 'center'}),
+
+    html.P('(species with greatest percent increase in frequency between 2001–2003 and 2018–2020)', style={'text-align': 'center'}),
+
+    html.Br(),
+
+    dash_table.DataTable(
+        id='inc_table',
+        style_table={'width':'50%', 'margin':'auto'},
+        columns=[{"name": i, "id": i} for i in df_inc.columns],
+        data=df_inc.to_dict('records'),
+        style_cell=dict(textAlign='left'),
+        style_header=dict(backgroundColor="light grey"),
+        style_data=dict(backgroundColor="lavender"),
+        style_cell_conditional=[
+        {'if': {'column_id': 'RANK'},
+         'width': '30px'},
+        {'if': {'column_id': 'COMMON NAME'},
+         'width': '50px'},
+        {'if': {'column_id': 'FREQUENCY PCT INCREASE'},
+         'width': '30px'},
+    ]),
+
+    html.Br(),
+    html.Br(),
+
+    html.H5('Most Common Species In My Checklists', style={'text-align': 'center'}),
+
+    html.Br(),
+
+    dash_table.DataTable(
+        id='common',
+        style_table={'width':'50%', 'margin':'auto'},
+        columns=[{"name": i, "id": i} for i in df_common.columns],
+        data=df_common.to_dict('records'),
+        style_cell=dict(textAlign='left'),
+        style_header=dict(backgroundColor="light grey"),
+        style_data=dict(backgroundColor="lavender"),
+        style_cell_conditional=[
+        {'if': {'column_id': 'RANK'},
+         'width': '30px'},
+        {'if': {'column_id': 'COMMON NAME'},
+         'width': '50px'},
+        {'if': {'column_id': 'CHECKLISTS'},
+         'width': '30px'},
+    ]),
+
+    html.Br(),
+    html.Br(),
+
+    html.H5('Rarest Species I Observed in 2020', style={'text-align': 'center'}),
+
+    html.P('(species with lowest frequency in 2020)', style={'text-align': 'center'}),
+
+    html.Br(),
+
+    dash_table.DataTable(
+        id='rarest',
+        style_table={'width':'50%', 'margin':'auto'},
+        columns=[{"name": i, "id": i} for i in df_rarest.columns],
+        data=df_rarest.to_dict('records'),
+        style_cell=dict(textAlign='left'),
+        style_header=dict(backgroundColor="light grey"),
+        style_data=dict(backgroundColor="lavender"),
+        style_cell_conditional=[
+        {'if': {'column_id': 'RANK'},
+         'width': '20px'},
+        {'if': {'column_id': 'COMMON NAME'},
+         'width': '30px'},
+        {'if': {'column_id': 'FREQUENCY'},
+         'width': '30px'},
+    ]),
+    
+    html.Br(),
     html.Br(),
 
     html.P('eBird Basic Dataset. Version: EBD_relJan-2021. Cornell Lab of Ornithology, Ithaca, New York. Jan 2021.', style={'text-align': 'center'})
@@ -226,6 +370,10 @@ def update_graph(winter_selected, species_selected, month_selected, map_species)
     # GRAPH YEARLY FREQUENCY CHANGE
 
     fig_fchange = px.line(fchange_species, x='YEAR', y='FREQUENCY CHANGE', color='COMMON NAME')
+
+    # GRAPH TABLE OF TOP IRRUPTIVE SPECIES
+
+
       
     return fig, fig_timeline, fig_choropleth, fig_fchange, fig_fchange_bar
 
