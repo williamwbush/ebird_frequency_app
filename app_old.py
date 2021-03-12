@@ -89,11 +89,36 @@ app.layout = html.Div([
     html.H5('Frequency by County', style={'text-align': 'center'}),
 
     html.Br(),
+
+    dcc.Dropdown(id='map_species',
+        options=[{'label':f'{species.title()}','value':f'{species}'} for species in sorted(list(set(df['COMMON NAME'])))],
+        placeholder='select species...',
+        multi=False,
+        value='Common Redpoll',
+        style={'width': '45%', 'margin':'auto'},
+        optionHeight=20,
+        persistence=True,
+        persistence_type='session'
+        ),
     
     html.Br(),
 
+    html.H6('Month', style={'text-align': 'center'}),
 
     # html.Div(id='outer_container', children=[], style={'text-align':'center'}),
+
+    dcc.Dropdown(id='month_dropdown',
+        options=[{'label':'January','value':7}, {'label':'February','value':8}, {'label':'March','value':9}, {'label':'April','value':10}, {'label':'May','value':11}, 
+                 {'label':'June','value':12}, {'label':'July','value':1}, {'label':'August','value':2}, {'label':'September','value':3}, {'label':'October','value':4}, 
+                 {'label':'November','value':5}, {'label':'December','value':6}],
+        placeholder='select month...',
+        multi=False,
+        value=7,
+        style={'width': '40%', 'margin':'auto'},
+        optionHeight=20,
+        persistence=True,
+        persistence_type='session'
+        ),
 
     # dcc.Slider(
     #     id='month_slider',
@@ -103,85 +128,9 @@ app.layout = html.Div([
     #     value=7,
     # ),
 
-    #####################################
-
-    html.Div([
-
-        html.Div([
-            html.H6('Month', style={'text-align': 'center'}),
-
-            dcc.Dropdown(id='month_dropdown',
-                options=[{'label':'January','value':7}, {'label':'February','value':8}, {'label':'March','value':9}, {'label':'April','value':10}, {'label':'May','value':11}, 
-                        {'label':'June','value':12}, {'label':'July','value':1}, {'label':'August','value':2}, {'label':'September','value':3}, {'label':'October','value':4}, 
-                        {'label':'November','value':5}, {'label':'December','value':6}],
-                placeholder='select month...',
-                multi=False,
-                value=7,
-                style={'width': '40%', 'margin':'auto'},
-                optionHeight=20,
-                persistence=True,
-                persistence_type='session'
-                ),
-            dcc.Dropdown(id='map_species',
-                options=[{'label':f'{species.title()}','value':f'{species}'} for species in sorted(list(set(df['COMMON NAME'])))],
-                placeholder='select species...',
-                multi=False,
-                value='Black-capped Chickadee',
-                style={'width': '45%', 'margin':'auto'},
-                optionHeight=20,
-                persistence=True,
-                persistence_type='session'
-            )
-
-        ],
-        style={'width': '49%', 'display': 'inline-block'}),
-        
-        html.Div([
-            html.H6('Month', style={'text-align': 'center'}),
-
-            dcc.Dropdown(id='month_dropdown2',
-                options=[{'label':'January','value':7}, {'label':'February','value':8}, {'label':'March','value':9}, {'label':'April','value':10}, {'label':'May','value':11}, 
-                        {'label':'June','value':12}, {'label':'July','value':1}, {'label':'August','value':2}, {'label':'September','value':3}, {'label':'October','value':4}, 
-                        {'label':'November','value':5}, {'label':'December','value':6}],
-                placeholder='select month...',
-                multi=False,
-                value=7,
-                style={'width': '40%', 'margin':'auto'},
-                optionHeight=20,
-                persistence=True,
-                persistence_type='session'
-                ),
-            dcc.Dropdown(id='map_species2',
-                options=[{'label':f'{species.title()}','value':f'{species}'} for species in sorted(list(set(df['COMMON NAME'])))],
-                placeholder='select species...',
-                multi=False,
-                value='Carolina Chickadee',
-                style={'width': '45%', 'margin':'auto'},
-                optionHeight=20,
-                persistence=True,
-                persistence_type='session'
-            )
-
-        ], style={'width': '49%', 'float': 'right', 'display': 'inline-block'})
-    ], style={
-        'borderBottom': 'thin lightgrey solid',
-        'backgroundColor': 'rgb(250, 250, 250)',
-        'padding': '10px 5px'
-    }),
-
-    html.Div([
-        dcc.Graph(id='county_choropleth', figure={}),
-    ], style={'width': '49%', 'display': 'inline-block', 'padding': '0 20'}),
-    
-    html.Div([
-        dcc.Graph(id='county_choropleth2', figure={}),
-    ], style={'display': 'inline-block', 'width': '49%'}),
-    
+    dcc.Graph(id='county_choropleth', figure={}),
 
     html.Br(),
-    html.Br(),
-    html.Br(),
-
 
     html.H5('Average Yearly Frequency', style={'text-align': 'center'}),
     
@@ -344,20 +293,17 @@ app.layout = html.Div([
     [Output(component_id='species_graph', component_property='figure'),
      Output(component_id='single_timeline', component_property='figure'),
      Output(component_id='county_choropleth', component_property='figure'),
-     Output(component_id='county_choropleth2', component_property='figure'),
      Output(component_id='frequency_change', component_property='figure'),
      Output(component_id='frequency_bar', component_property='figure'),
      Output(component_id='irruptive', component_property='figure')],
     [Input(component_id='select_winter', component_property='value'),
      Input(component_id='select_species', component_property='value'),
      Input(component_id='month_dropdown', component_property='value'),
-     Input(component_id='month_dropdown2', component_property='value'),
-     Input(component_id='map_species', component_property='value'),
-     Input(component_id='map_species2', component_property='value')]
+     Input(component_id='map_species', component_property='value')]
 )
 
 
-def update_graph(winter_selected, species_selected, month_selected, month_selected2, map_species, map_species2):
+def update_graph(winter_selected, species_selected, month_selected, map_species):
     
     dfc = df.copy()
     
@@ -421,26 +367,6 @@ def update_graph(winter_selected, species_selected, month_selected, month_select
     fig_choropleth.update_geos(fitbounds="locations", visible=False)
     fig_choropleth.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
-    # GRAPH SECOND CHOROPLETH
-
-    month_selected2 = ((month_selected2 + 6) % 12) or 12
-
-    df_counties_s2 = df_counties[df_counties['COMMON NAME'] == map_species2.upper()]
-
-    df_counties_m2 = df_counties_s2[df_counties_s2['OBSERVATION MONTH'] == month_selected2]
-
-    fmax2 = list(df_counties_s2['FREQUENCY'])
-    fmax2 = max(fmax2)
-    
-    fig_choropleth2 = px.choropleth(df_counties_m2, geojson=counties, locations='FIPS', color='FREQUENCY',
-                           color_continuous_scale="Viridis",
-                           range_color=(0, fmax2),
-                           scope="usa",
-                           labels={'COUNTY':'county','FREQUENCY':'frequency'},
-                          )
-    fig_choropleth2.update_geos(fitbounds="locations", visible=False)
-    fig_choropleth2.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-
     # GRAPH YEARLY FREQUENCY
     
     fchange_species = df_fchange[df_fchange['COMMON NAME'].str.lower().isin(species.lower() for species in species_selected)]
@@ -457,7 +383,7 @@ def update_graph(winter_selected, species_selected, month_selected, month_select
 
 
       
-    return fig, fig_timeline, fig_choropleth, fig_choropleth2, fig_fchange, fig_fchange_bar, irruptive_species
+    return fig, fig_timeline, fig_choropleth, fig_fchange, fig_fchange_bar, irruptive_species
 
 
 if __name__ == '__main__':
